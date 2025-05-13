@@ -4,7 +4,7 @@
 
 ---
 
-## 1 ️⃣ Overview
+## 1 Overview
 
 This repository proposes and outlines a **fully‑unsupervised, high‑accuracy pipeline** for identifying *≈200* unique speakers in an unlabeled collection of WAV recordings.
 The core idea:
@@ -18,7 +18,7 @@ Most of the heavy lifting is done by the powerful speaker‑embedding model, all
 
 ---
 
-## 2 ️⃣ Data Exploration & Analysis
+## 2 Data Exploration & Analysis
 
 | Step                                 | Purpose                               |
 | ------------------------------------ | ------------------------------------- |
@@ -35,7 +35,7 @@ Challenges discovered:
 
 ---
 
-## 3 ️⃣ Proposed Solution & Justification
+## 3 Proposed Solution & Justification
 
 | Component           | Choice                            | Rationale                                             |
 | ------------------- | --------------------------------- | ----------------------------------------------------- |
@@ -48,7 +48,7 @@ Why it works: embeddings compress speaker identity into a compact vector; cluste
 
 ---
 
-## 4 ️⃣ Conceptual Implementation Strategy
+## 4 Conceptual Implementation Strategy
 
 ```text
 preprocess.py
@@ -74,7 +74,7 @@ All code is **conceptual/pseudocode** and can be converted to runnable Python wi
 
 ---
 
-## 5 ️⃣ Challenges & Mitigations
+## 5 Challenges & Mitigations
 
 | Challenge                 | Mitigation                                                                          |
 | ------------------------- | ----------------------------------------------------------------------------------- |
@@ -86,7 +86,7 @@ All code is **conceptual/pseudocode** and can be converted to runnable Python wi
 
 ---
 
-## 6 ️⃣ Repository Layout
+## 6 Repository Layout
 
 ```
 /README.md              ← THIS FILE
@@ -102,7 +102,7 @@ All code is **conceptual/pseudocode** and can be converted to runnable Python wi
 
 ---
 
-## 7 ️⃣ Quick‑Start (Conceptual)
+## 7 Quick‑Start (Conceptual)
 
 ```bash
 # 1. Prepare env
@@ -119,7 +119,7 @@ python code/evaluate.py     # prints silhouette & saves plots
 
 ---
 
-## 8 ️⃣ Next Steps
+## 8 Next Steps
 
 1. Swap ECAPA for any newer embedding model if desired.
 2. Iterate clustering parameters to hit exactly 200 clusters.
