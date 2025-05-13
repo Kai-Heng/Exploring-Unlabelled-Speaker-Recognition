@@ -76,10 +76,13 @@ All code is **conceptual/pseudocode** and can be converted to runnable Python wi
 
 ## 5 ️⃣ Challenges & Mitigations
 
-* **Similar voices** → use ECAPA + fine‑tune if clusters merge.
-* **Background noise** → VAD & optional spectral gating.
-* **Uneven recordings per speaker** → density‑aware clustering (HDBSCAN).
-* **No labels** → internal metrics & spot‑check 5–10% clusters.
+| Challenge                 | Mitigation                                                                          |
+| ------------------------- | ----------------------------------------------------------------------------------- |
+| Similar‑sounding speakers | High‑resolution ECAPA embeddings; iterative re‑clustering of suspect large clusters |
+| Noise / channel mismatch  | VAD + light spectral denoising; robustness of ECAPA (trained with augmentation)     |
+| No ground truth           | Internal metrics; targeted manual listening; verification‑score cross‑checks        |
+| Over‑ / under‑clustering  | Compare HDBSCAN vs. fixed‑k AHC, inspect cluster size distribution                  |
+
 
 ---
 
@@ -87,7 +90,7 @@ All code is **conceptual/pseudocode** and can be converted to runnable Python wi
 
 ```
 /README.md              ← THIS FILE
-/docs/Proposal.pdf      ← Detailed write‑up (all questions answered)
+/Exploring Unlabelled Speaker Recognition Documentation.pdf      ← Detailed write‑up (all questions answered)
 /code/
    preprocess.py*       ← audio cleaning (conceptual)
    extract_embeddings.py*
