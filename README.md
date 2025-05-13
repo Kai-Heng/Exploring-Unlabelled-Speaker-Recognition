@@ -1,29 +1,127 @@
 # Exploring-Unlabelled-Speaker-Recognition
-This repository contains the initial scaffolding for a proof-of-concept speaker clustering system developed for the AIngineer take-home assignment. The goal is to group speech segments from a collection of unlabeled audio recordings by speaker identity, using fully unsupervised methods.
 
-## 🔍 Problem Overview
+> **Refer to the full documentation (`Exploring Unlabelled Speaker Recognition Documentation.pdf`) if you need more detailed explanations.**
 
-Given a dataset of microphone recordings with no labels, the task is to identify and cluster speech segments by speaker. The output should assign consistent IDs to each speaker such that future segments can be matched to their respective clusters.
+---
 
-## 🧱 Planned Architecture
+## 1 ️⃣ Overview
 
-The project will be developed in modular stages:
+This repository proposes and outlines a **fully‑unsupervised, high‑accuracy pipeline** for identifying *≈200* unique speakers in an unlabeled collection of WAV recordings.
+The core idea:
 
-1. **Preprocessing**
-   - Resample audio to 16 kHz mono
-   - Apply Voice Activity Detection (VAD)
-   - Extract speech-only segments
+1. **Pre‑process** audio (resample, VAD, normalise).
+2. **Embed** each utterance with a **pre‑trained ECAPA‑TDNN** (or x‑vector) network.
+3. **Cluster** the embedding vectors (HDBSCAN / Spectral Clustering) to form speaker IDs.
+4. **Validate** clusters using internal metrics & manual spot‑checks.
 
-2. **Embedding Extraction**
-   - Use pre-trained models (e.g., ECAPA-TDNN) to convert segments into fixed-length speaker embeddings
+Most of the heavy lifting is done by the powerful speaker‑embedding model, allowing accurate separation without labelled data.
 
-3. **Clustering**
-   - Apply unsupervised clustering (e.g., HDBSCAN, AHC) to group similar speaker embeddings
+---
 
-4. **Post-processing**
-   - Refine cluster assignments and label stability
-   - Prepare system for inference on unseen segments
-   
+## 2 ️⃣ Data Exploration & Analysis
+
+| Step                                 | Purpose                               |
+| ------------------------------------ | ------------------------------------- |
+| Listen to samples                    | Gauge voice diversity & noise levels  |
+| Waveform plots                       | Detect silence, clipping, long pauses |
+| Spectrograms                         | Visualise pitch & formant patterns    |
+| Basic statistics (pitch, MFCC means) | Spot broad clusters (e.g. gender)     |
+
+Challenges discovered:
+
+* Varying recording quality & background noise.
+* Possible near‑identical voices.
+* No ground‑truth labels for evaluation.
+
+---
+
+## 3 ️⃣ Proposed Solution & Justification
+
+| Component           | Choice                            | Rationale                                             |
+| ------------------- | --------------------------------- | ----------------------------------------------------- |
+| **Embeddings**      | ECAPA‑TDNN (192‑D)                | SOTA robustness; trained to separate speakers         |
+| **Distance Metric** | Cosine                            | Invariant to loudness; aligns with embedding training |
+| **Clustering**      | HDBSCAN –or– Spectral             | Handles unequal cluster sizes; auto‑detects outliers  |
+| **Evaluation**      | Silhouette, DBI, manual listening | Only viable when labels are absent                    |
+
+Why it works: embeddings compress speaker identity into a compact vector; clustering then groups vectors that are naturally close in this space.
+
+---
+
+## 4 ️⃣ Conceptual Implementation Strategy
+
+```text
+preprocess.py
+  - resample 16 kHz mono
+  - voice‑activity‑detect & trim
+  - loudness normalise
+
+extract_embeddings.py
+  - load ECAPA model (SpeechBrain)
+  - for each .wav → 192‑D vector → save to embeddings.npy
+
+cluster_embeddings.py
+  - load embeddings.npy
+  - run HDBSCAN(min_cluster_size=2)
+  - save cluster_labels.csv
+
+evaluate.py
+  - silhouette_score(embeddings, labels)
+  - flag low‑silhouette recordings for manual review
+```
+
+All code is **conceptual/pseudocode** and can be converted to runnable Python with minimal effort.
+
+---
+
+## 5 ️⃣ Challenges & Mitigations
+
+* **Similar voices** → use ECAPA + fine‑tune if clusters merge.
+* **Background noise** → VAD & optional spectral gating.
+* **Uneven recordings per speaker** → density‑aware clustering (HDBSCAN).
+* **No labels** → internal metrics & spot‑check 5–10% clusters.
+
+---
+
+## 6 ️⃣ Repository Layout
+
+```
+/README.md              ← THIS FILE
+/docs/Proposal.pdf      ← Detailed write‑up (all questions answered)
+/code/
+   preprocess.py*       ← audio cleaning (conceptual)
+   extract_embeddings.py*
+   cluster_embeddings.py*
+   evaluate.py*
+```
+
+*(starred files are high‑level pseudocode – edit into real scripts as you iterate)*
+
+---
+
+## 7 ️⃣ Quick‑Start (Conceptual)
+
+```bash
+# 1. Prepare env
+conda create -n speaker-dia python=3.10
+conda activate speaker-dia
+pip install speechbrain hdbscan librosa matplotlib
+
+# 2. Run pipeline
+python code/preprocess.py   # cleans /data/*.wav → /data/clean/*.wav
+python code/extract_embeddings.py  # → embeddings.npy
+python code/cluster_embeddings.py  # → cluster_labels.csv
+python code/evaluate.py     # prints silhouette & saves plots
+```
+
+---
+
+## 8 ️⃣ Next Steps
+
+1. Swap ECAPA for any newer embedding model if desired.
+2. Iterate clustering parameters to hit exactly 200 clusters.
+3. Build a small web dashboard to audition clusters and merge/split interactively.
+
 ---
 
 *Project bootstrapped May 2025 – innovation in progress 🚧*
