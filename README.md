@@ -136,6 +136,7 @@ python src/evaluate.py     # prints silhouette & saves plots
 | **Spectral Clustering** (nearest‑neighbors affinity) | −0.024                       | 2.614                            | Performed poorly — negative silhouette and high DB index indicate ill‑formed clusters for this embedding.          |
 
 <sup>†</sup> **Silhouette score** ∈ \[−1, 1]  (+1 = well‑separated,  0 ≈ overlap,  −1 = mis‑clustered. Higher is better.)
+
 <sup>‡</sup> **Davies‑Bouldin index** ≥ 0  (0 = perfectly compact/isolated clusters. Lower is better.)
 
 ---
