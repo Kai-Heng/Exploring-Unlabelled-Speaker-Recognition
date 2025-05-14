@@ -1,6 +1,6 @@
-# Exploring-Unlabelled-Speaker-Recognition
+# Exploring-Unlabeled-Speaker-Recognition
 
-> **Refer to the full documentation (`Exploring Unlabelled Speaker Recognition Documentation.pdf`) if you need more detailed explanations.**
+> **Refer to the full documentation (`Exploring Unlabeled Speaker Recognition Documentation.pdf`) if you need more detailed explanations.**
 
 ---
 
@@ -94,7 +94,7 @@ src/
 ## 🗂️ Repository Layout
 
 ```
-Exploring-Unlabelled-Speaker-Recognition/
+Exploring-Unlabeled-Speaker-Recognition/
 ├── data/
 │   ├── raw/          # <-- original WAVs go here
 │   ├── combined/     # <-- concatenated WAVs go here (Optional)
@@ -107,7 +107,7 @@ Exploring-Unlabelled-Speaker-Recognition/
 │   ├── embed.py
 │   ├── cluster.py
 │   └── evaluate.py
-├── Exploring Unlabelled Speaker Recognition Documentation.pdf   # <-- Detailed write‑up
+├── Exploring Unlabeled Speaker Recognition Documentation.pdf   # <-- Detailed write‑up
 ├── README.md
 └── requirements.txt
 ```
