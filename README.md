@@ -141,21 +141,6 @@ python src/evaluate.py     # prints silhouette & saves plots
 
 ---
 
-## 🎧 About the Dataset — *AudioMNIST (Combined)*
-
-| Property                | Value                                       |
-| ----------------------- | ------------------------------------------- |
-| **Total clips**         | 30 000 WAV files                            |
-| **Speakers**            | 60 (one folder per speaker)                 |
-| **Digits**              | 0 – 9 (spoken)                              |
-| **Samples per speaker** | 500 (≈ 50 clips per digit before combining) |
-| **Metadata**            | `audioMNIST_meta.txt` (gender, age, etc.)   |
-| **Source**              | Kaggle dataset “Audio MNIST”        |
-
-For this task the raw digit recordings for each speaker were **concatenated digit‑wise** (e.g., all “0” → `00_combined.wav`, all “1” → `01_combined.wav`, …) to create longer utterances, yielding exactly **60 × 50 = 3 000 combined clips** used in the clustering experiments.
-
----
-
 ### 📈 Metric Ranges & Why They Matter
 
 * **Silhouette Score (S)**
@@ -177,6 +162,21 @@ These complementary metrics help avoid relying on a single view of cluster quali
 * **HDBSCAN** matched K‑Means’ quantitative scores **without** requiring you to guess *k* and **flagged noise points** automatically — valuable for speaker‑embedding spaces that may contain outliers.
 * **Spectral Clustering** under‑performed on the same embeddings, suggesting either a poor affinity choice or that the speaker manifold is not well captured by a graph‑based approach here.
 * Given equal scores, you might prefer **HDBSCAN** for its flexibility and practical benefits (automatic cluster count, noise handling).
+
+---
+
+## 🎧 About the Dataset — *AudioMNIST (Combined)*
+
+| Property                | Value                                       |
+| ----------------------- | ------------------------------------------- |
+| **Total clips**         | 30 000 WAV files                            |
+| **Speakers**            | 60 (one folder per speaker)                 |
+| **Digits**              | 0 – 9 (spoken)                              |
+| **Samples per speaker** | 500 (≈ 50 clips per digit before combining) |
+| **Metadata**            | `audioMNIST_meta.txt` (gender, age, etc.)   |
+| **Source**              | Kaggle dataset “Audio MNIST”        |
+
+For this task, the raw digit recordings for each speaker were **concatenated across digits** — that is, each combined clip contains a sequence of digits from 0 to 9 spoken in order. This process was repeated 50 times per speaker, resulting in **60 speakers × 50 combined recordings = 3 000 utterances**. These longer clips were created to ensure greater phonetic variability per recording, enabling the CAPA‑TDNN model to better capture speaker-specific features for clustering.
 
 ---
 
