@@ -2,7 +2,7 @@
 """Embed each cleaned WAV using SpeechBrain ECAPA‑TDNN."""
 import os, argparse, torch, numpy as np, soundfile as sf
 from tqdm import tqdm
-from speechbrain.pretrained import EncoderClassifier
+from speechbrain.inference import EncoderClassifier
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -25,11 +25,14 @@ def main(clean_dir, emb_dir):
             raise ValueError("Pre‑processing should resample to 16 kHz.")
         with torch.no_grad():
             emb = encoder.encode_batch(wav.unsqueeze(0))
-        embeddings.append(emb.squeeze(0).cpu().numpy())
+        embeddings.append(emb.squeeze().cpu().numpy())
         names.append(fname)
     embeddings = np.stack(embeddings)
     np.save(os.path.join(emb_dir, "embeddings.npy"), embeddings)
-    np.savetxt(os.path.join(emb_dir, "filenames.txt"), names, fmt="%s")
+    with open(os.path.join(emb_dir, "filenames.txt"), "w") as f:
+        for name in names:
+            f.write(name + "\n")
+
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()

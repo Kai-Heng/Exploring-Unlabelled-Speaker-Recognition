@@ -1,10 +1,13 @@
 numpy
 scipy
-librosa>=0.10
+librosa
 soundfile
+torchvision
+torchaudio
 webrtcvad
-torch>=2.0
+torch
 speechbrain
 hdbscan
-scikit‑learn
+scikit-learn
 tqdm
+matplotlib

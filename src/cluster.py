@@ -9,22 +9,29 @@ def main(emb_dir, out_json, min_cluster_size=2):
     X = np.load(os.path.join(emb_dir, "embeddings.npy"))
     X = normalize(X)                 # L2‑normalise → cosine ≈ euclidean
     print(f"Clustering {X.shape[0]} embeddings …")
-    clusterer = hdbscan.HDBSCAN(min_cluster_size=min_cluster_size,
-                                metric="euclidean")
+
+    # Decent Clustering Method HDBSCAN & K-means
+    # HDBSCAN [Silhouette = 0.510  |  Davies‑Bouldin = 0.824]
+    # clusterer = hdbscan.HDBSCAN(min_cluster_size=min_cluster_size,
+    #                             metric="euclidean")
+    # labels = clusterer.fit_predict(X)
+
+    # k-Means [Silhouette = 0.510  |  Davies‑Bouldin = 0.824]
+    clusterer = KMeans(n_clusters=60, n_init=20, random_state=42)
     labels = clusterer.fit_predict(X)
 
-    # Spectral (needs n_clusters)
-    # clusterer = SpectralClustering(n_clusters=200, affinity='nearest_neighbors',
+    # Spectral [Silhouette = -0.024  |  Davies‑Bouldin = 2.614]
+    # clusterer = SpectralClustering(n_clusters=60, affinity='nearest_neighbors',
     #                             assign_labels='kmeans')
     # labels = clusterer.fit_predict(X)
 
-    # k-Means
-    # clusterer = KMeans(n_clusters=200, n_init=20, random_state=42)
-    # labels = clusterer.fit_predict(X)
-    
     # Save mapping filename → cluster_id
-    files = np.loadtxt(os.path.join(emb_dir, "filenames.txt"), dtype=str).tolist()
-    mapping = {fname: int(lbl) for fname, lbl in zip(files, labels)}
+    with open(os.path.join(emb_dir, "filenames.txt")) as f:
+        files = [line.strip() for line in f]
+    print(f"[DEBUG] # files: {len(files)}, # labels: {len(labels)}")
+    if len(files) != len(labels):
+        raise ValueError("Mismatch between # filenames and # cluster labels")
+    mapping = dict(zip(files, map(int, labels)))
     with open(out_json, "w") as f:
         json.dump(mapping, f, indent=2)
     # Quick stats

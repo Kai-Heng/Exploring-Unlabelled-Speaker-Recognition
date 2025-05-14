@@ -4,7 +4,7 @@
 
 ---
 
-## 1 Overview
+## Overview
 
 This repository proposes and outlines a **fully‑unsupervised, high‑accuracy pipeline** for identifying *≈200* unique speakers in an unlabeled collection of WAV recordings.
 The core idea:
@@ -18,7 +18,7 @@ Most of the heavy lifting is done by the powerful speaker‑embedding model, all
 
 ---
 
-## 2 Data Exploration & Analysis
+## Data Exploration & Analysis
 
 | **Exploration Step**                 | **Purpose**                                                                                         |
 | ------------------------------------ | --------------------------------------------------------------------------------------------------- |
@@ -38,13 +38,13 @@ Challenges discovered:
 
 ---
 
-## 3 Proposed Solution & Justification
+## Proposed Solution & Justification
 
 | **Component**            | **Selected Method**                                                     | **Justification**                                                                       |
 | ------------------------ | ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
 | **Speaker Embeddings**   | ECAPA‑TDNN (192‑D)                                                      | State-of-the-art model with strong robustness to noise and speaker variability          |
 | **Similarity Metric**    | Cosine similarity                                                       | Scale-invariant; matches the training objective of modern speaker embeddings            |
-| **Clustering Algorithm** | HDBSCAN or Spectral Clustering                                          | Handles variable cluster sizes; identifies outliers; no need to predefine cluster count |
+| **Clustering Algorithm** | HDBSCAN                                          | Handles variable cluster sizes; identifies outliers; no need to predefine cluster count |
 | **Evaluation Strategy**  | Silhouette score, Davies-Bouldin Index (DBI), manual audio verification | Effective for unsupervised validation when no ground truth is available                 |
 
 
@@ -52,7 +52,7 @@ Why it works: embeddings compress speaker identity into a compact vector; cluste
 
 ---
 
-## 4 Conceptual Implementation Strategy
+## Conceptual Implementation Strategy
 
 ```text
 src/
@@ -77,11 +77,9 @@ src/
     • list recordings with low silhouette for manual review
 ```
 
-All code is **conceptual/pseudocode** and can be converted to runnable Python with minimal effort.
-
 ---
 
-## 5 Challenges & Mitigations
+## Challenges & Mitigations
 
 | Challenge                 | Mitigation                                                                          |
 | ------------------------- | ----------------------------------------------------------------------------------- |
@@ -93,7 +91,7 @@ All code is **conceptual/pseudocode** and can be converted to runnable Python wi
 
 ---
 
-## 6 Repository Layout
+## Repository Layout
 
 ```
 Exploring-Unlabelled-Speaker-Recognition/
@@ -112,11 +110,11 @@ Exploring-Unlabelled-Speaker-Recognition/
 ```
 ---
 
-## 7 Quick‑Start (Conceptual)
+## Quick‑Start (Conceptual)
 
 ```bash
 # 1. Prepare env
-python -m venv AINgineer && source AINgineer/bin/activate  # Windows: AINgineer\Scripts\activate
+python3.12 -m venv AINgineer && source AINgineer/bin/activate  # Windows: AINgineer\Scripts\activate
 pip install -r requirements.txt
 
 # 2. Run pipeline
@@ -128,11 +126,54 @@ python src/evaluate.py     # prints silhouette & saves plots
 
 ---
 
-## 8 Next Steps
+## 📊 Clustering Evaluation Results
 
-1. Swap ECAPA for any newer embedding model if desired.
-2. Iterate clustering parameters to hit exactly 200 clusters.
-3. Build a small web dashboard to audition clusters and merge/split interactively.
+| Algorithm                                            | Silhouette Score<sup>†</sup> | Davies‑Bouldin Index<sup>‡</sup> | Observations                                                                                                       |
+| ---------------------------------------------------- | ---------------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| **HDBSCAN**                                          | **0.510**                    | **0.824**                        | Same overall quality as K‑Means on this dataset, while automatically discovering cluster count and flagging noise. |
+| **K‑Means** (k = 60, n\_init = 20, seed = 42)        | **0.510**                    | **0.824**                        | Fast and simple; matched HDBSCAN’s scores but required pre‑setting *k* and forces every point into a cluster.      |
+| **Spectral Clustering** (nearest‑neighbors affinity) | −0.024                       | 2.614                            | Performed poorly — negative silhouette and high DB index indicate ill‑formed clusters for this embedding.          |
+
+<sup>†</sup> **Silhouette score** ∈ \[−1, 1]  •  +1 = well‑separated,  0 ≈ overlap,  −1 = mis‑clustered. Higher is better. <sup>‡</sup> **Davies‑Bouldin index** ≥ 0  •  0 = perfectly compact/isolated clusters. Lower is better.
+
+---
+
+## 🎧 About the Dataset — *AudioMNIST (Combined)*
+
+| Property                | Value                                       |
+| ----------------------- | ------------------------------------------- |
+| **Total clips**         | 30 000 WAV files                            |
+| **Speakers**            | 60 (one folder per speaker)                 |
+| **Digits**              | 0 – 9 (spoken)                              |
+| **Samples per speaker** | 500 (≈ 50 clips per digit before combining) |
+| **Metadata**            | `audioMNIST_meta.txt` (gender, age, etc.)   |
+| **Source**              | Kaggle dataset “Audio MNIST”        |
+
+For this task the raw digit recordings for each speaker were **concatenated digit‑wise** (e.g., all “0” → `00_combined.wav`, all “1” → `01_combined.wav`, …) to create longer utterances, yielding exactly **60 × 50 = 3 000 combined clips** used in the clustering experiments.
+
+---
+
+### 📈 Metric Ranges & Why They Matter
+
+* **Silhouette Score (S)**
+
+  * Range **−1 → 1**.
+  * *Interpretation*: S ≳ 0.5 is generally considered good; S < 0 suggests points are assigned to the wrong clusters.
+
+* **Davies‑Bouldin Index (DBI)**
+
+  * Range **0 → ∞**.
+  * *Interpretation*: DBI ≲ 1 indicates compact, well‑separated clusters; values ≫ 1 mean high overlap.
+
+These complementary metrics help avoid relying on a single view of cluster quality.
+
+---
+
+### 🔍 Quick Takeaways
+
+* **HDBSCAN** matched K‑Means’ quantitative scores **without** requiring you to guess *k* and **flagged noise points** automatically — valuable for speaker‑embedding spaces that may contain outliers.
+* **Spectral Clustering** under‑performed on the same embeddings, suggesting either a poor affinity choice or that the speaker manifold is not well captured by a graph‑based approach here.
+* Given equal scores, you might prefer **HDBSCAN** for its flexibility and practical benefits (automatic cluster count, noise handling).
 
 ---
 
