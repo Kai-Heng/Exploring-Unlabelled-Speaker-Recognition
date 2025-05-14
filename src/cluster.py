@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Cluster ECAPA embeddings with HDBSCAN."""
 import os, argparse, numpy as np, hdbscan, json
 from sklearn.preprocessing import normalize
@@ -12,13 +11,13 @@ def main(emb_dir, out_json, min_cluster_size=2):
 
     # Decent Clustering Method HDBSCAN & K-means
     # HDBSCAN [Silhouette = 0.510  |  Davies‑Bouldin = 0.824]
-    # clusterer = hdbscan.HDBSCAN(min_cluster_size=min_cluster_size,
-    #                             metric="euclidean")
-    # labels = clusterer.fit_predict(X)
+    clusterer = hdbscan.HDBSCAN(min_cluster_size=min_cluster_size,
+                                metric="euclidean")
+    labels = clusterer.fit_predict(X)
 
     # k-Means [Silhouette = 0.510  |  Davies‑Bouldin = 0.824]
-    clusterer = KMeans(n_clusters=60, n_init=20, random_state=42)
-    labels = clusterer.fit_predict(X)
+    # clusterer = KMeans(n_clusters=60, n_init=20, random_state=42)
+    # labels = clusterer.fit_predict(X)
 
     # Spectral [Silhouette = -0.024  |  Davies‑Bouldin = 2.614]
     # clusterer = SpectralClustering(n_clusters=60, affinity='nearest_neighbors',

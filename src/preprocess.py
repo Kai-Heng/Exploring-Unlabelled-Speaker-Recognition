@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Pre‑processing: resample ➜ VAD ➜ loudness normalise ➜ save cleaned WAV."""
 import os, argparse, math, wave, contextlib, soundfile as sf, numpy as np
 import librosa, webrtcvad

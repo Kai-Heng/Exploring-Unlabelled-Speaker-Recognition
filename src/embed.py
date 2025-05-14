@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Embed each cleaned WAV using SpeechBrain ECAPA‑TDNN."""
 import os, argparse, torch, numpy as np, soundfile as sf
 from tqdm import tqdm

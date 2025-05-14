@@ -18,7 +18,7 @@ Most of the heavy lifting is done by the powerful speaker‑embedding model, all
 
 ---
 
-## Data Exploration & Analysis
+## 🔍 Data Exploration & Analysis
 
 | **Exploration Step**                 | **Purpose**                                                                                         |
 | ------------------------------------ | --------------------------------------------------------------------------------------------------- |
@@ -38,7 +38,7 @@ Challenges discovered:
 
 ---
 
-## Proposed Solution & Justification
+## 💡 Proposed Solution & Justification
 
 | **Component**            | **Selected Method**                                                     | **Justification**                                                                       |
 | ------------------------ | ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
@@ -52,7 +52,7 @@ Why it works: embeddings compress speaker identity into a compact vector; cluste
 
 ---
 
-## Conceptual Implementation Strategy
+## 🛠️ Conceptual Implementation Strategy
 
 ```text
 src/
@@ -79,7 +79,7 @@ src/
 
 ---
 
-## Challenges & Mitigations
+## ⚠️ Challenges & Mitigations
 
 | Challenge                 | Mitigation                                                                          |
 | ------------------------- | ----------------------------------------------------------------------------------- |
@@ -91,32 +91,45 @@ src/
 
 ---
 
-## Repository Layout
+## 🗂️ Repository Layout
 
 ```
 Exploring-Unlabelled-Speaker-Recognition/
 ├── data/
-│   ├── raw/          # <‑‑ 200 original WAVs go here
+│   ├── raw/          # <-- original WAVs go here
+│   ├── combined/     # <-- concatenated WAVs go here (Optional)
 │   ├── clean/        # auto‑generated VAD‑trimmed clips
 │   └── embeddings/   # auto‑generated .npy vectors
 ├── src/
+│   ├── extract_recordings.py # copy Audio‑MNIST --> data/raw/
+│   ├── combine_audio.py # concatenate digit recordings --> data/combined/
 │   ├── preprocess.py
 │   ├── embed.py
 │   ├── cluster.py
 │   └── evaluate.py
-├── Exploring Unlabelled Speaker Recognition Documentation.pdf   # <‑‑ Detailed write‑up
+├── Exploring Unlabelled Speaker Recognition Documentation.pdf   # <-- Detailed write‑up
 ├── README.md
 └── requirements.txt
 ```
 ---
 
-## Quick‑Start (Conceptual)
+## 🚀 Quick‑Start
 
 ```bash
-# 1. Prepare env
+# 0) Clone repository
+git clone https://github.com/Kai-Heng/Exploring-Unlabelled-Speaker-Recognition.git
+cd Exploring-Unlabelled-Speaker-Recognition
+
+# 1) Set up Python 3.12 environment
 python3.12 -m venv AINgineer
-source AINgineer/bin/activate  # Windows: AINgineer\Scripts\activate
+source AINgineer/bin/activate          # (Windows → AINgineer\Scripts\activate)
 pip install -r requirements.txt
+
+# 2) Prepare data  
+# • If you already have WAVs in  data/raw/  → **skip this step.**
+# • Otherwise, populate it from the Audio‑MNIST download (≈ 30 000 files):
+python src/extract_recordings.py --src /path/to/AudioMNIST/data/
+python src/combine_audio.py
 
 # 2. Run pipeline
 python src/preprocess.py   # cleans /data/*.wav → /data/clean/*.wav
@@ -127,7 +140,7 @@ python src/evaluate.py     # prints silhouette & saves plots
 
 ---
 
-## 📊 Clustering Evaluation Results
+## 📊 Clustering Evaluation Results (Experiment with 60 speakers)
 
 | Algorithm                                            | Silhouette Score<sup>†</sup> | Davies‑Bouldin Index<sup>‡</sup> | Observations                                                                                                       |
 | ---------------------------------------------------- | ---------------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
@@ -138,6 +151,9 @@ python src/evaluate.py     # prints silhouette & saves plots
 <sup>†</sup> **Silhouette score** ∈ \[−1, 1]  (+1 = well‑separated,  0 ≈ overlap,  −1 = mis‑clustered. Higher is better.)
 
 <sup>‡</sup> **Davies‑Bouldin index** ≥ 0  (0 = perfectly compact/isolated clusters. Lower is better.)
+
+
+Complete JSON mapping of recording → cluster is in ```data/embeddings/cluster_map.json```.
 
 ---
 
@@ -157,7 +173,7 @@ These complementary metrics help avoid relying on a single view of cluster quali
 
 ---
 
-### 🔍 Quick Takeaways
+### Quick Takeaways
 
 * **HDBSCAN** matched K‑Means’ quantitative scores **without** requiring you to guess *k* and **flagged noise points** automatically — valuable for speaker‑embedding spaces that may contain outliers.
 * **Spectral Clustering** under‑performed on the same embeddings, suggesting either a poor affinity choice or that the speaker manifold is not well captured by a graph‑based approach here.
@@ -180,4 +196,14 @@ For this task, the raw digit recordings for each speaker were **concatenated acr
 
 ---
 
-*Project bootstrapped May 2025 – innovation in progress 🚧*
+## 🧠 Future Work
+
+While this pipeline demonstrates solid performance on a structured dataset like AudioMNIST, several areas remain open for extension and experimentation:
+
+* **Generalization to real-world data:** Test on more varied datasets with spontaneous speech, background noise, and cross-channel recordings.
+* **Dynamic clustering techniques:** Investigate semi-supervised refinement or pseudo-label bootstrapping using high-confidence clusters.
+* **Incremental speaker addition:** Explore how the model handles unseen speakers and how embeddings generalize to new voices.
+* **Embedding model fine-tuning:** Fine-tune ECAPA-TDNN on unlabeled target domain recordings using self-supervised objectives to better capture domain-specific features.
+* **Post-processing with centroid modeling:** Use cluster centroids as speaker prototypes and apply few-shot classification for new recordings.
+
+---

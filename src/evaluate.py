@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Silhouette score, Davies‑Bouldin Index, and size histogram."""
 import os, argparse, json, numpy as np, matplotlib.pyplot as plt
 from sklearn.metrics import silhouette_score, davies_bouldin_score
