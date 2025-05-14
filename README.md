@@ -20,12 +20,15 @@ Most of the heavy lifting is done by the powerful speaker‑embedding model, all
 
 ## 2 Data Exploration & Analysis
 
-| Step                                 | Purpose                               |
-| ------------------------------------ | ------------------------------------- |
-| Listen to samples                    | Gauge voice diversity & noise levels  |
-| Waveform plots                       | Detect silence, clipping, long pauses |
-| Spectrograms                         | Visualise pitch & formant patterns    |
-| Basic statistics (pitch, MFCC means) | Spot broad clusters (e.g. gender)     |
+| **Exploration Step**                 | **Purpose**                                                                                         |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| Listening to audio samples           | Understand voice diversity, accents, noise, and potential overlap between speakers                  |
+| Plotting waveform diagrams           | Identify amplitude variations, silence regions, clipping, or speech rhythm anomalies                |
+| Spectrogram visualization            | Observe pitch, formant structures, and frequency distribution across time                           |
+| Statistical feature extraction       | Analyze MFCCs, pitch, and speaking rate to detect broad groupings (e.g., by gender or vocal traits) |
+| Silence and speech segmentation      | Detect and isolate active voice regions using VAD; flag recordings with multiple speakers           |
+| Feature space projection (PCA/t-SNE) | Visualize embedding clusters to assess speaker separability and clustering potential                |
+
 
 Challenges discovered:
 
@@ -37,12 +40,13 @@ Challenges discovered:
 
 ## 3 Proposed Solution & Justification
 
-| Component           | Choice                            | Rationale                                             |
-| ------------------- | --------------------------------- | ----------------------------------------------------- |
-| **Embeddings**      | ECAPA‑TDNN (192‑D)                | SOTA robustness; trained to separate speakers         |
-| **Distance Metric** | Cosine                            | Invariant to loudness; aligns with embedding training |
-| **Clustering**      | HDBSCAN –or– Spectral             | Handles unequal cluster sizes; auto‑detects outliers  |
-| **Evaluation**      | Silhouette, DBI, manual listening | Only viable when labels are absent                    |
+| **Component**            | **Selected Method**                                                     | **Justification**                                                                       |
+| ------------------------ | ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| **Speaker Embeddings**   | ECAPA‑TDNN (192‑D)                                                      | State-of-the-art model with strong robustness to noise and speaker variability          |
+| **Similarity Metric**    | Cosine similarity                                                       | Scale-invariant; matches the training objective of modern speaker embeddings            |
+| **Clustering Algorithm** | HDBSCAN or Spectral Clustering                                          | Handles variable cluster sizes; identifies outliers; no need to predefine cluster count |
+| **Evaluation Strategy**  | Silhouette score, Davies-Bouldin Index (DBI), manual audio verification | Effective for unsupervised validation when no ground truth is available                 |
+
 
 Why it works: embeddings compress speaker identity into a compact vector; clustering then groups vectors that are naturally close in this space.
 
@@ -51,23 +55,26 @@ Why it works: embeddings compress speaker identity into a compact vector; cluste
 ## 4 Conceptual Implementation Strategy
 
 ```text
-preprocess.py
-  - resample 16 kHz mono
-  - voice‑activity‑detect & trim
-  - loudness normalise
-
-extract_embeddings.py
-  - load ECAPA model (SpeechBrain)
-  - for each .wav → 192‑D vector → save to embeddings.npy
-
-cluster_embeddings.py
-  - load embeddings.npy
-  - run HDBSCAN(min_cluster_size=2)
-  - save cluster_labels.csv
-
-evaluate.py
-  - silhouette_score(embeddings, labels)
-  - flag low‑silhouette recordings for manual review
+src/
+├── preprocess.py         # 1.  Audio cleaning
+│   • resample to 16 kHz mono
+│   • apply VAD → trim silence / noise
+│   • loudness‑normalise → data/clean/
+│
+├── embed.py              # 2.  Speaker‑vector extraction
+│   • load SpeechBrain ECAPA‑TDNN
+│   • each WAV → 192‑D embedding
+│   • stack → embeddings.npy  +  filenames.txt
+│
+├── cluster.py            # 3.  Unsupervised grouping
+│   • load embeddings.npy  (L2‑normalised)
+│   • run HDBSCAN(min_cluster_size=2)
+│   • output cluster_map.json  {filename: cluster_id}
+│
+└── evaluate.py           # 4.  Quality checks
+    • compute Silhouette & Davies‑Bouldin indices
+    • plot cluster‑size histogram
+    • list recordings with low silhouette for manual review
 ```
 
 All code is **conceptual/pseudocode** and can be converted to runnable Python with minimal effort.
@@ -89,32 +96,34 @@ All code is **conceptual/pseudocode** and can be converted to runnable Python wi
 ## 6 Repository Layout
 
 ```
-/README.md              ← THIS FILE
-/Exploring Unlabelled Speaker Recognition Documentation.pdf      ← Detailed write‑up (all questions answered)
-/code/
-   preprocess.py*       ← audio cleaning (conceptual)
-   extract_embeddings.py*
-   cluster_embeddings.py*
-   evaluate.py*
+Exploring-Unlabelled-Speaker-Recognition/
+├── data/
+│   ├── raw/          # <‑‑ 200 original WAVs go here
+│   ├── clean/        # auto‑generated VAD‑trimmed clips
+│   └── embeddings/   # auto‑generated .npy vectors
+├── src/
+│   ├── preprocess.py
+│   ├── embed.py
+│   ├── cluster.py
+│   └── evaluate.py
+├── Exploring Unlabelled Speaker Recognition Documentation.pdf   # <‑‑ Detailed write‑up
+├── README.md
+└── requirements.txt
 ```
-
-*(starred files are high‑level pseudocode – edit into real scripts as you iterate)*
-
 ---
 
 ## 7 Quick‑Start (Conceptual)
 
 ```bash
 # 1. Prepare env
-conda create -n speaker-dia python=3.10
-conda activate speaker-dia
-pip install speechbrain hdbscan librosa matplotlib
+python -m venv AINgineer && source AINgineer/bin/activate  # Windows: AINgineer\Scripts\activate
+pip install -r requirements.txt
 
 # 2. Run pipeline
-python code/preprocess.py   # cleans /data/*.wav → /data/clean/*.wav
-python code/extract_embeddings.py  # → embeddings.npy
-python code/cluster_embeddings.py  # → cluster_labels.csv
-python code/evaluate.py     # prints silhouette & saves plots
+python src/preprocess.py   # cleans /data/*.wav → /data/clean/*.wav
+python src/embed.py        # → embeddings.npy
+python src/cluster.py      # → cluster_map.json
+python src/evaluate.py     # prints silhouette & saves plots
 ```
 
 ---

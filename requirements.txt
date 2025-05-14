@@ -1,0 +1,10 @@
+numpy
+scipy
+librosa>=0.10
+soundfile
+webrtcvad
+torch>=2.0
+speechbrain
+hdbscan
+scikit‑learn
+tqdm
