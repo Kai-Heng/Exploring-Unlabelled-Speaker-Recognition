@@ -11,18 +11,20 @@ def main(emb_dir, out_json, min_cluster_size=2):
 
     # Decent Clustering Method HDBSCAN & K-means
     # HDBSCAN [Silhouette = 0.510  |  Davies‑Bouldin = 0.824]
-    clusterer = hdbscan.HDBSCAN(min_cluster_size=min_cluster_size,
-                                metric="euclidean")
-    labels = clusterer.fit_predict(X)
+    # clusterer = hdbscan.HDBSCAN(min_cluster_size=min_cluster_size,
+    #                             metric="euclidean")
+    # labels = clusterer.fit_predict(X)
 
     # k-Means [Silhouette = 0.510  |  Davies‑Bouldin = 0.824]
     # clusterer = KMeans(n_clusters=60, n_init=20, random_state=42)
     # labels = clusterer.fit_predict(X)
 
     # Spectral [Silhouette = -0.024  |  Davies‑Bouldin = 2.614]
-    # clusterer = SpectralClustering(n_clusters=60, affinity='nearest_neighbors',
-    #                             assign_labels='kmeans')
-    # labels = clusterer.fit_predict(X)
+    # 'nearest_neighbors': construct the affinity matrix by computing a graph of nearest neighbors.
+    # 'rbf': construct the affinity matrix using a radial basis function (RBF) kernel.
+    clusterer = SpectralClustering(n_clusters=60, affinity='rbf',
+                                assign_labels='kmeans')
+    labels = clusterer.fit_predict(X)
 
     # Save mapping filename → cluster_id
     with open(os.path.join(emb_dir, "filenames.txt")) as f:

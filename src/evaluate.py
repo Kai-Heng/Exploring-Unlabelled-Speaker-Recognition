@@ -1,6 +1,6 @@
 """Silhouette score, Davies‑Bouldin Index, and size histogram."""
 import os, argparse, json, numpy as np, matplotlib.pyplot as plt
-from sklearn.metrics import silhouette_score, davies_bouldin_score
+from sklearn.metrics import silhouette_score, davies_bouldin_score, calinski_harabasz_score
 from sklearn.preprocessing import normalize
 
 def main(emb_dir, map_json):
@@ -9,12 +9,14 @@ def main(emb_dir, map_json):
     mask = labels != -1                     # exclude outliers for metrics
     X = normalize(X[mask])
     y = labels[mask]
+    print(labels)
     if len(set(y)) < 2:
         print("Need ≥2 clusters for metrics.")
         return
     sil = silhouette_score(X, y, metric="euclidean")
     dbi = davies_bouldin_score(X, y)
-    print(f"Silhouette = {sil:.3f}  |  Davies‑Bouldin = {dbi:.3f}")
+    cal = calinski_harabasz_score(X, y)
+    print(f"Silhouette = {sil:.3f}  |  Davies‑Bouldin = {dbi:.3f} | Calinski-Harabasz = {cal:.3f}")
 
     # Histogram plot
     uniq, counts = np.unique(labels, return_counts=True)
